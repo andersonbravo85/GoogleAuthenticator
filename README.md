@@ -18,37 +18,51 @@ verifications to 10 tries within 10 minutes for one IP address (or IPv6 block). 
 Usage:
 ------
 
-See following example:
+Exemplo:
 
 ```php
 <?php
-require_once 'PHPGangsta/GoogleAuthenticator.php';
+
+require 'GoogleAuthenticator.php';
+
+$mytoken = "AndersonBravo";
 
 $ga = new PHPGangsta_GoogleAuthenticator();
+
 $secret = $ga->createSecret();
-echo "Secret is: ".$secret."\n\n";
 
-$qrCodeUrl = $ga->getQRCodeGoogleUrl('Blog', $secret);
-echo "Google Charts URL for the QR-Code: ".$qrCodeUrl."\n\n";
+// SECRET deve ser salvo no banco de dados ou arquivo de configuração
+// para comparação mais tarde quando o usuário digitar o
+// código gerado no app GoogleAuthenticator
 
-$oneCode = $ga->getCode($secret);
-echo "Checking Code '$oneCode' and Secret '$secret':\n";
+// Gerando a url do QR-Code para ser scaneado
+// pelo app GoogleAuthenticator
+$qrCodeUrl = $ga->getQRCodeGoogleUrl($mytoken, $secret);
+```
 
-$checkResult = $ga->verifyCode($secret, $oneCode, 2);    // 2 = 2*30sec clock tolerance
+Autenticando pelo Google Authenticator:
+
+```php
+<?php
+
+// Acessar página que vai solicitar o código do Google Authenticator
+// Abrir app e verificar o código para digitar na página
+
+// podemos gerar os códigos via php também:
+// $code = $ga->getCode($secret);
+
+$code = $_POST['code'];
+
+// a funcao abaixo verifica se o codigo informado bate com
+// a chave gerada e armazenada anteriormente
+
+$checkResult = $ga->verifyCode($secret, $code, 2);    // 2 = 2*30sec clock tolerance
+
 if ($checkResult) {
-    echo 'OK';
+	echo 'OK';
 } else {
-    echo 'FAILED';
-}
-```
-Running the script provides the following output:
-```
-Secret is: OQB6ZZGYHCPSX4AK
-
-Google Charts URL for the QR-Code: https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/infoATphpgangsta.de%3Fsecret%3DOQB6ZZGYHCPSX4AK
-
-Checking Code '848634' and Secret 'OQB6ZZGYHCPSX4AK':
-OK
+	echo 'FAILED';
+}	
 ```
 
 Installation:
